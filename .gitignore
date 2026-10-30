@@ -1,0 +1,26 @@
+# Secrets and local config (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
+# Python environments and caches
+.venv/
+backend/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Editor and OS files
+.obsidian/
+docs/.obsidian/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local data dumps from investigation (may contain portal data)
+export*.json
+energy*.json
+*.har
