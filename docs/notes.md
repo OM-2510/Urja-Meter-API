@@ -140,7 +140,6 @@ Minimum request to log in (tested in curl by removing headers one at a time):
 
 * Replay window: a browser-copied signature worked within ~2-3 min and failed on a later replay (not measured exactly).
 
-* **🔴 TODO:** Pagination not tested (needs a valid signature for `page=2`; the portal's own Export button requests only `page=1`, read from the page's JS).
 
 ### 2.4 Signing key
 
@@ -148,7 +147,6 @@ Minimum request to log in (tested in curl by removing headers one at a time):
 
 * Confirmed: this secret is the HMAC key for `x-signature` (see 2.3)
 
-* The page fetches it before each export. **🔴 TODO:** whether it stays the same across logins (compare two logins in the Python client).
 
 ### 2.5 Meter geo
 
@@ -172,7 +170,6 @@ Minimum request to log in (tested in curl by removing headers one at a time):
 
 * `kwh` and `kvah` rise on every row in this sample (looks like a cumulative register, so use during an interval = difference between consecutive rows; inferred). `voltR` stayed between 220 and 240.
 
-* **🔴 TODO:** Row count per meter: count in code (337 expected if there are no gaps).
 
 ## 3. Irregularities Mapping
 
@@ -204,7 +201,7 @@ Minimum request to log in (tested in curl by removing headers one at a time):
 
   * Unconventionally hands the backend signing secret to any logged-in client user.
 
-## 4. Data quirks (spotted with AI help in sample responses) **🔴 TODO:** verify against the full export data in code
+## 4. Data quirks (spotted with AI help in sample responses) 
 
 * `build` has more than one value: `legacy` and `v2` (seen on J100004).
 
@@ -226,70 +223,6 @@ Minimum request to log in (tested in curl by removing headers one at a time):
 
 * Guessed the signature message format in an HMAC tool (timestamp alone, path+query joined, various separators): no match. Reading the page's JS gave the real recipe (method, path, query and timestamp on separate lines).
 
-## 6. Open questions
 
-* **🔴 TODO:** Export `page=2` and above with a valid signature.
 
-* **🔴 TODO:** Whether `signingSecret` changes between logins.
 
-* Whether `energy` accepts query params: not tested (the browser sends none; the API filters dates itself).
-
-* Where the detail page gets its nameplate and breadcrumb: probably its `__data.json` load, not inspected (export carries the same fields).
-
-## 7. AI use log
-
-* Used Claude as a tutor to learn Chrome DevTools, to structure these notes, and to explain the minified signing function after I pasted it from the page's JS.
-
-* Claude suggested where to look (the Initiator tab) and supplied a generic HMAC snippet and the candidate message formats I tried (those failed, see Dead ends).
-
-* Endpoint discovery, the header tests, the curl reproductions and verifying the signature match were done by me.
-
-* Claude drafted section 8 (design decisions) from my findings.
-
-* **🔴 TODO:** Update this log once the Python client is written (what I wrote myself, what AI reviewed).
-
-## 8. Design decisions (draft for the README) **🔴 TODO:** review and edit so every line is a decision I can defend
-
-* **Stack:** Python + FastAPI (typed models, `openapi.json` generated automatically), `requests` for portal calls.
-
-* **Structure (kept small):**
-
-  * `portal/client.py`: the only code that talks to the portal (login, cookie, signing, re-login and retry)
-
-  * `schemas.py`: clean response models
-
-  * `service.py`: caching and merging of portal data
-
-  * `main.py`: FastAPI routes
-
-* **Data sources:**
-
-  * Meters from `/portal/export`: one call returns nameplate, geo and hierarchy for all 403 meters (~231 kB).
-
-  * Transformers from `/portal/dts`: the only source of `capacityKva` (2 pages).
-
-  * Consumption from `/portal/meters/{meterId}/energy`, fetched per meter on demand.
-
-  * `search` and `geo` are not used: both are subsets of export. Trade-off: the API depends on the signing scheme, and there is no fallback if the portal changes it.
-
-* **API surface (draft):** `GET /meters` (filters + pagination), `GET /meters/{meter_id}`, `GET /meters/{meter_id}/consumption` (optional `from`/`to`), `GET /transformers`, `GET /transformers/{code}`, `GET /health`. A hierarchy tree endpoint only if time remains.
-
-* **Normalisation:** numbers returned as numbers, timestamps as ISO 8601, coordinates as numeric `lat`/`lng`. Assumption: the portal's timestamps are local Indian time (IST, +05:30), since the portal states no timezone.
-
-* **Session and signing:**
-
-  * Log in lazily and reuse the cookie. Read login success from the JSON body (`type: redirect`), not the HTTP status.
-
-  * A dead session and a bad signature both return 401, so the client reads the body `error`: `unauthorized` means log in again and retry once; `signature_invalid` means sign again with a fresh timestamp and retry once.
-
-  * Fetch `signingSecret` at runtime and never store it. Credentials come from environment variables (`.env`, not committed).
-
-* **Caching:** export and DT data cached in memory with a configurable TTL; consumption cached per meter. The data appears static (last reading 30/06/2026), so TTL-only expiry with no invalidation is low risk.
-
-* **Errors:** unknown meter returns 404; a portal failure after one retry returns 502 with a clear JSON error.
-
-* **Read-only and polite:** only GET calls plus login/logout, one shared session, no request bursts.
-
-* **Tests (small):** message building and signature format with a dummy secret (the real secret never goes in the repo), login-failure body detection, energy normalisation, and one endpoint test with a stubbed portal client.
-
-* **Intentionally skipped:** Postgres/local query index, web client, persistent cache, auth and rate limiting on my own API.
