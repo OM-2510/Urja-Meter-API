@@ -1,0 +1,692 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Urja Meter API",
+      "description": "Clean and Organized service over Urja Meter Ops Portal",
+      "version": "0.1.0"
+    },
+    "paths": {
+      "/health": {
+        "get": {
+          "tags": [
+            "system"
+          ],
+          "summary": "Health",
+          "operationId": "health_health_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/meters": {
+        "get": {
+          "tags": [
+            "meters"
+          ],
+          "summary": "List Meters",
+          "operationId": "list_meters_meters_get",
+          "parameters": [
+            {
+              "name": "q",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Case-insensitive substring of meter ID or serial number",
+                "title": "Q"
+              },
+              "description": "Case-insensitive substring of meter ID or serial number"
+            },
+            {
+              "name": "make",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Exact match, e.g. HPL, Genus",
+                "title": "Make"
+              },
+              "description": "Exact match, e.g. HPL, Genus"
+            },
+            {
+              "name": "phase_type",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "single or three",
+                "title": "Phase Type"
+              },
+              "description": "single or three"
+            },
+            {
+              "name": "install_status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Installed, Faulty or Decommissioned",
+                "title": "Install Status"
+              },
+              "description": "Installed, Faulty or Decommissioned"
+            },
+            {
+              "name": "dt_code",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Distribution transformer code, e.g. DT-001",
+                "title": "Dt Code"
+              },
+              "description": "Distribution transformer code, e.g. DT-001"
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 1,
+                "title": "Page"
+              }
+            },
+            {
+              "name": "page_size",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "maximum": 100,
+                "minimum": 1,
+                "default": 20,
+                "title": "Page Size"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/MeterPage"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/meters/{meter_id}": {
+        "get": {
+          "tags": [
+            "meters"
+          ],
+          "summary": "Get Meter",
+          "operationId": "get_meter_meters__meter_id__get",
+          "parameters": [
+            {
+              "name": "meter_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Meter Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Meter"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/meters/{meter_id}/consumption": {
+        "get": {
+          "tags": [
+            "meters"
+          ],
+          "summary": "Get Consumption",
+          "operationId": "get_consumption_meters__meter_id__consumption_get",
+          "parameters": [
+            {
+              "name": "meter_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Meter Id"
+              }
+            },
+            {
+              "name": "from",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "ISO 8601; naive values are treated as IST",
+                "title": "From"
+              },
+              "description": "ISO 8601; naive values are treated as IST"
+            },
+            {
+              "name": "to",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "ISO 8601; naive values are treated as IST",
+                "title": "To"
+              },
+              "description": "ISO 8601; naive values are treated as IST"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Consumption"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Consumption": {
+          "properties": {
+            "meter_id": {
+              "type": "string",
+              "title": "Meter Id"
+            },
+            "count": {
+              "type": "integer",
+              "title": "Count"
+            },
+            "readings": {
+              "items": {
+                "$ref": "#/components/schemas/Reading"
+              },
+              "type": "array",
+              "title": "Readings"
+            }
+          },
+          "type": "object",
+          "required": [
+            "meter_id",
+            "count",
+            "readings"
+          ],
+          "title": "Consumption"
+        },
+        "GeoPoint": {
+          "properties": {
+            "lat": {
+              "type": "number",
+              "title": "Lat"
+            },
+            "lng": {
+              "type": "number",
+              "title": "Lng"
+            }
+          },
+          "type": "object",
+          "required": [
+            "lat",
+            "lng"
+          ],
+          "title": "GeoPoint"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "Hierarchy": {
+          "properties": {
+            "zone": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Level"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "circle": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Level"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "division": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Level"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "subdivision": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Level"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "substation": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Level"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "feeder": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Level"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "dt": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Level"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object",
+          "title": "Hierarchy"
+        },
+        "Level": {
+          "properties": {
+            "code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            }
+          },
+          "type": "object",
+          "title": "Level"
+        },
+        "Meter": {
+          "properties": {
+            "meter_id": {
+              "type": "string",
+              "title": "Meter Id"
+            },
+            "serial_no": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Serial No"
+            },
+            "make": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Make"
+            },
+            "phase_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Phase Type"
+            },
+            "install_status": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Install Status"
+            },
+            "install_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Install Type"
+            },
+            "build": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Build"
+            },
+            "dt_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dt Code"
+            },
+            "hierarchy": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Hierarchy"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "geo": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/GeoPoint"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "meter_id"
+          ],
+          "title": "Meter"
+        },
+        "MeterPage": {
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/Meter"
+              },
+              "type": "array",
+              "title": "Items"
+            },
+            "total": {
+              "type": "integer",
+              "title": "Total"
+            },
+            "page": {
+              "type": "integer",
+              "title": "Page"
+            },
+            "page_size": {
+              "type": "integer",
+              "title": "Page Size"
+            }
+          },
+          "type": "object",
+          "required": [
+            "items",
+            "total",
+            "page",
+            "page_size"
+          ],
+          "title": "MeterPage"
+        },
+        "Reading": {
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Timestamp"
+            },
+            "kwh": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kwh"
+            },
+            "kvah": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kvah"
+            },
+            "volt_r": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Volt R"
+            }
+          },
+          "type": "object",
+          "required": [
+            "timestamp"
+          ],
+          "title": "Reading"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            },
+            "input": {
+              "title": "Input"
+            },
+            "ctx": {
+              "type": "object",
+              "title": "Context"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      }
+    }
+  }
