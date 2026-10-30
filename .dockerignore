@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.git
+.venv
+backend/.venv
+**/__pycache__
+**/.pytest_cache
+**/*.py[cod]
+**/*.har
+export*.json
+energy*.json
